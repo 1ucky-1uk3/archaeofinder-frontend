@@ -37,22 +37,43 @@ const regions = [
 ];
 
 const ARCHAEOLOGICAL_LABELS = [
+‘stone amulet’, ‘amulet’, ‘talisman’, ‘charm’,
+‘pendant’, ‘stone pendant’, ‘perforated stone’, ‘pierced stone’,
+‘polished stone’, ‘stone artifact’, ‘neolithic stone’, ‘ground stone’,
+‘whetstone’, ‘grinding stone’, ‘hammer stone’, ‘pebble tool’,
 ‘arrowhead’, ‘arrow head’, ‘projectile point’, ‘spearhead’, ‘spear point’,
-‘flint tool’, ‘stone tool’, ‘lithic’, ‘scraper’, ‘blade’,
+‘flint tool’, ‘stone tool’, ‘lithic’, ‘scraper’, ‘blade’, ‘flint blade’,
+‘hand axe’, ‘stone axe’, ‘polished axe’, ‘axehead’,
 ‘fibula’, ‘brooch’, ‘pin’, ‘buckle’, ‘clasp’,
 ‘coin’, ‘roman coin’, ‘greek coin’, ‘medieval coin’, ‘celtic coin’,
-‘pottery’, ‘ceramic’, ‘vessel’, ‘amphora’, ‘vase’, ‘urn’, ‘bowl’,
-‘sword’, ‘dagger’, ‘knife’, ‘axe’, ‘axehead’, ‘weapon’,
-‘ring’, ‘finger ring’, ‘bracelet’, ‘necklace’, ‘pendant’, ‘jewelry’, ‘bead’,
+‘pottery’, ‘pottery shard’, ‘ceramic’, ‘vessel’, ‘amphora’, ‘vase’, ‘urn’, ‘bowl’,
+‘sword’, ‘dagger’, ‘knife’, ‘axe’, ‘weapon’, ‘blade weapon’,
+‘ring’, ‘finger ring’, ‘bracelet’, ‘necklace’, ‘bead’, ‘glass bead’,
 ‘bronze object’, ‘iron object’, ‘gold object’, ‘silver object’, ‘copper object’,
-‘roman artifact’, ‘greek artifact’, ‘celtic artifact’, ‘medieval artifact’, ‘viking artifact’,
-‘statue’, ‘figurine’, ‘sculpture’, ‘idol’,
-‘tool’, ‘hammer’, ‘chisel’, ‘needle’, ‘spindle whorl’,
-‘religious object’, ‘ritual object’, ‘votive offering’,
-‘bone object’, ‘antler’, ‘ivory’, ‘glass bead’, ‘amber’
+‘roman artifact’, ‘greek artifact’, ‘celtic artifact’, ‘medieval artifact’,
+‘statue’, ‘figurine’, ‘sculpture’, ‘idol’, ‘venus figurine’,
+‘tool’, ‘bone tool’, ‘antler tool’, ‘needle’, ‘spindle whorl’, ‘loom weight’,
+‘religious object’, ‘ritual object’, ‘votive offering’, ‘cult object’,
+‘fossil’, ‘bone’, ‘tooth’, ‘shell’, ‘amber’, ‘jet’
 ];
 
 const LABEL_TRANSLATIONS = {
+‘stone amulet’: ‘Steinamulett’,
+‘amulet’: ‘Amulett’,
+‘talisman’: ‘Talisman’,
+‘charm’: ‘Gluecksbringer’,
+‘pendant’: ‘Anhaenger’,
+‘stone pendant’: ‘Steinanhaenger’,
+‘perforated stone’: ‘Durchlochter Stein’,
+‘pierced stone’: ‘Durchbohrter Stein’,
+‘polished stone’: ‘Geschliffener Stein’,
+‘stone artifact’: ‘Steinartefakt’,
+‘neolithic stone’: ‘Neolithischer Stein’,
+‘ground stone’: ‘Geschliffener Stein’,
+‘whetstone’: ‘Schleifstein’,
+‘grinding stone’: ‘Mahlstein’,
+‘hammer stone’: ‘Hammerstein’,
+‘pebble tool’: ‘Gerollgeraet’,
 ‘arrowhead’: ‘Pfeilspitze’,
 ‘arrow head’: ‘Pfeilspitze’,
 ‘projectile point’: ‘Projektilspitze’,
@@ -63,6 +84,11 @@ const LABEL_TRANSLATIONS = {
 ‘lithic’: ‘Steingeraet’,
 ‘scraper’: ‘Schaber’,
 ‘blade’: ‘Klinge’,
+‘flint blade’: ‘Feuersteinkalinge’,
+‘hand axe’: ‘Faustkeil’,
+‘stone axe’: ‘Steinaxt’,
+‘polished axe’: ‘Geschliffene Axt’,
+‘axehead’: ‘Axtkopf’,
 ‘fibula’: ‘Fibel’,
 ‘brooch’: ‘Brosche’,
 ‘pin’: ‘Nadel’,
@@ -74,6 +100,7 @@ const LABEL_TRANSLATIONS = {
 ‘medieval coin’: ‘Mittelalterliche Muenze’,
 ‘celtic coin’: ‘Keltische Muenze’,
 ‘pottery’: ‘Keramik’,
+‘pottery shard’: ‘Keramikscherbe’,
 ‘ceramic’: ‘Keramik’,
 ‘vessel’: ‘Gefaess’,
 ‘amphora’: ‘Amphore’,
@@ -84,15 +111,14 @@ const LABEL_TRANSLATIONS = {
 ‘dagger’: ‘Dolch’,
 ‘knife’: ‘Messer’,
 ‘axe’: ‘Axt’,
-‘axehead’: ‘Axtkopf’,
 ‘weapon’: ‘Waffe’,
+‘blade weapon’: ‘Klingenwaffe’,
 ‘ring’: ‘Ring’,
 ‘finger ring’: ‘Fingerring’,
 ‘bracelet’: ‘Armreif’,
 ‘necklace’: ‘Halskette’,
-‘pendant’: ‘Anhaenger’,
-‘jewelry’: ‘Schmuck’,
 ‘bead’: ‘Perle’,
+‘glass bead’: ‘Glasperle’,
 ‘bronze object’: ‘Bronzeobjekt’,
 ‘iron object’: ‘Eisenobjekt’,
 ‘gold object’: ‘Goldobjekt’,
@@ -102,24 +128,27 @@ const LABEL_TRANSLATIONS = {
 ‘greek artifact’: ‘Griechisches Artefakt’,
 ‘celtic artifact’: ‘Keltisches Artefakt’,
 ‘medieval artifact’: ‘Mittelalterliches Artefakt’,
-‘viking artifact’: ‘Wikinger Artefakt’,
 ‘statue’: ‘Statue’,
 ‘figurine’: ‘Figurine’,
 ‘sculpture’: ‘Skulptur’,
 ‘idol’: ‘Idol’,
+‘venus figurine’: ‘Venusfigurine’,
 ‘tool’: ‘Werkzeug’,
-‘hammer’: ‘Hammer’,
-‘chisel’: ‘Meissel’,
+‘bone tool’: ‘Knochenwerkzeug’,
+‘antler tool’: ‘Geweihwerkzeug’,
 ‘needle’: ‘Nadel’,
 ‘spindle whorl’: ‘Spinnwirtel’,
+‘loom weight’: ‘Webgewicht’,
 ‘religious object’: ‘Kultgegenstand’,
 ‘ritual object’: ‘Ritualobjekt’,
 ‘votive offering’: ‘Votivgabe’,
-‘bone object’: ‘Knochenobjekt’,
-‘antler’: ‘Geweih’,
-‘ivory’: ‘Elfenbein’,
-‘glass bead’: ‘Glasperle’,
-‘amber’: ‘Bernstein’
+‘cult object’: ‘Kultobjekt’,
+‘fossil’: ‘Fossil’,
+‘bone’: ‘Knochen’,
+‘tooth’: ‘Zahn’,
+‘shell’: ‘Muschel’,
+‘amber’: ‘Bernstein’,
+‘jet’: ‘Gagat’
 };
 
 export default function Home() {
@@ -180,7 +209,7 @@ try {
   const topLabels = results
     .sort((a, b) => b.score - a.score)
     .slice(0, 5)
-    .filter(r => r.score > 0.02)
+    .filter(r => r.score > 0.01)
     .map(r => ({
       en: r.label,
       de: LABEL_TRANSLATIONS[r.label] || r.label,
@@ -249,13 +278,17 @@ try {
     setDetectedLabels(labels);
     
     if (labels.length > 0) {
-      const englishTerms = labels.map(l => l.en).join(' ');
+      const englishTerms = labels.slice(0, 3).map(l => l.en).join(' ');
       searchTerms = searchTerms ? searchTerms + ' ' + englishTerms : englishTerms;
     }
   }
 
+  if (!searchTerms) {
+    searchTerms = 'archaeology artifact';
+  }
+
   const params = new URLSearchParams();
-  if (searchTerms) params.append('q', searchTerms);
+  params.append('q', searchTerms);
   if (filters.epoch !== 'Alle Epochen') params.append('epoch', filters.epoch);
   if (filters.objectType !== 'Alle Objekttypen') params.append('object_type', filters.objectType);
   if (filters.region !== 'Alle Regionen') params.append('region', filters.region);
@@ -318,8 +351,8 @@ panelTitle: { fontSize: ‘1.25rem’, color: ‘#c9a962’, marginBottom: ‘1.
 input: { width: ‘100%’, padding: ‘0.75rem 1rem’, background: ‘rgba(0, 0, 0, 0.3)’, border: ‘1px solid rgba(232, 224, 213, 0.2)’, borderRadius: ‘8px’, color: ‘#e8e0d5’, fontSize: ‘1rem’ },
 label: { display: ‘block’, fontSize: ‘0.75rem’, color: ‘rgba(232, 224, 213, 0.6)’, textTransform: ‘uppercase’, letterSpacing: ‘0.05em’, marginBottom: ‘0.5rem’ },
 button: { width: ‘100%’, padding: ‘1rem’, background: ‘linear-gradient(135deg, #c9a962, #a08050)’, borderRadius: ‘12px’, border: ‘none’, color: ‘#1a1612’, fontWeight: ‘600’, fontSize: ‘1rem’, cursor: ‘pointer’, display: ‘flex’, alignItems: ‘center’, justifyContent: ‘center’, gap: ‘0.75rem’ },
-tag: { padding: ‘0.25rem 0.75rem’, background: ‘rgba(201, 169, 98, 0.2)’, border: ‘1px solid #c9a962’, borderRadius: ‘999px’, fontSize: ‘0.875rem’, color: ‘#c9a962’, display: ‘flex’, flexDirection: ‘column’, alignItems: ‘center’ },
-tagScore: { fontSize: ‘0.7rem’, opacity: 0.7 },
+tag: { padding: ‘0.35rem 0.75rem’, background: ‘rgba(201, 169, 98, 0.2)’, border: ‘1px solid #c9a962’, borderRadius: ‘999px’, fontSize: ‘0.8rem’, color: ‘#c9a962’, display: ‘inline-flex’, alignItems: ‘center’, gap: ‘0.5rem’ },
+tagScore: { fontSize: ‘0.7rem’, opacity: 0.7, background: ‘rgba(0,0,0,0.3)’, padding: ‘0.1rem 0.4rem’, borderRadius: ‘999px’ },
 card: { background: ‘rgba(232, 224, 213, 0.05)’, border: ‘1px solid rgba(232, 224, 213, 0.1)’, borderRadius: ‘12px’, overflow: ‘hidden’ },
 cardImage: { position: ‘relative’, height: ‘176px’, background: ‘rgba(0, 0, 0, 0.2)’, overflow: ‘hidden’ },
 cardContent: { padding: ‘1rem’ },
@@ -374,7 +407,7 @@ return (
                 <div style={{marginTop: '1rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center'}}>
                   {detectedLabels.map((label, i) => (
                     <span key={i} style={styles.tag}>
-                      <span>{label.de}</span>
+                      {label.de}
                       <span style={styles.tagScore}>{Math.round(label.score * 100)}%</span>
                     </span>
                   ))}
@@ -398,7 +431,7 @@ return (
           <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
             <div>
               <label style={styles.label}>Suchbegriffe (optional)</label>
-              <input type="text" placeholder="z.B. Fibel, Muenze, Pfeilspitze..." value={searchKeywords} onChange={(e) => setSearchKeywords(e.target.value)} style={styles.input} />
+              <input type="text" placeholder="z.B. Amulett, Pfeilspitze, Steinbeil..." value={searchKeywords} onChange={(e) => setSearchKeywords(e.target.value)} style={styles.input} />
             </div>
             <div>
               <label style={styles.label}>Epoche</label>
@@ -432,7 +465,7 @@ return (
               <h2 style={{fontSize: '1.5rem', color: '#c9a962', marginBottom: '0.25rem'}}>Vergleichsfunde</h2>
               <p style={{color: 'rgba(232, 224, 213, 0.6)'}}>
                 {results.length} von {totalResults.toLocaleString()} Ergebnissen
-                {detectedLabels.length > 0 && <span> • KI erkannte: {detectedLabels.map(l => l.de).join(', ')}</span>}
+                {detectedLabels.length > 0 && <span> • KI erkannte: {detectedLabels.slice(0, 3).map(l => l.de).join(', ')}</span>}
               </p>
             </div>
             <button onClick={resetSearch} style={{padding: '0.5rem 1rem', border: '1px solid rgba(232, 224, 213, 0.3)', borderRadius: '8px', background: 'transparent', color: 'rgba(232, 224, 213, 0.6)', cursor: 'pointer'}}>
@@ -442,7 +475,8 @@ return (
 
           {results.length === 0 ? (
             <div style={{textAlign: 'center', padding: '3rem', color: 'rgba(232, 224, 213, 0.4)'}}>
-              <p>Keine Ergebnisse gefunden. Versuchen Sie andere Suchbegriffe.</p>
+              <p style={{marginBottom: '1rem'}}>Keine Ergebnisse gefunden.</p>
+              <p>Tipp: Geben Sie zusaetzliche Suchbegriffe ein oder waehlen Sie andere Filter.</p>
             </div>
           ) : (
             <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.25rem'}}>
