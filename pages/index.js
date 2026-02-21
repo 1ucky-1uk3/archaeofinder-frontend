@@ -16,14 +16,59 @@ const epochs = [
 
 const objectTypes = [
 “Alle Objekttypen”,
-“Fibeln”,
-“Muenzen”,
+“Steinwerkzeug”,
+“Amulett”,
+“Anhaenger”,
+“Pfeilspitze”,
+“Speerspitze”,
+“Steinbeil”,
+“Faustkeil”,
+“Schaber”,
+“Klinge”,
+“Fibel”,
+“Brosche”,
+“Muenze”,
 “Keramik”,
-“Waffen”,
-“Schmuck”,
-“Kultgegenstaende”,
-“Alltagsgegenstaende”
+“Gefaess”,
+“Schwert”,
+“Dolch”,
+“Messer”,
+“Axt”,
+“Ring”,
+“Armreif”,
+“Perle”,
+“Figur”,
+“Nadel”,
+“Spinnwirtel”
 ];
+
+const objectTypeToSearch = {
+“Alle Objekttypen”: “”,
+“Steinwerkzeug”: “stone tool neolithic”,
+“Amulett”: “amulet pendant charm stone”,
+“Anhaenger”: “pendant perforated stone”,
+“Pfeilspitze”: “arrowhead projectile point flint”,
+“Speerspitze”: “spearhead spear point”,
+“Steinbeil”: “stone axe polished axe neolithic”,
+“Faustkeil”: “hand axe paleolithic”,
+“Schaber”: “scraper flint tool”,
+“Klinge”: “blade flint blade”,
+“Fibel”: “fibula brooch roman”,
+“Brosche”: “brooch pin clasp”,
+“Muenze”: “coin numismatic”,
+“Keramik”: “pottery ceramic shard”,
+“Gefaess”: “vessel amphora urn bowl”,
+“Schwert”: “sword blade weapon”,
+“Dolch”: “dagger knife blade”,
+“Messer”: “knife blade tool”,
+“Axt”: “axe axehead bronze iron”,
+“Ring”: “ring finger ring jewelry”,
+“Armreif”: “bracelet armring jewelry”,
+“Perle”: “bead glass bead amber”,
+“Figur”: “figurine statue sculpture idol”,
+“Nadel”: “pin needle bone bronze”,
+“Spinnwirtel”: “spindle whorl loom weight”
+};
 
 const regions = [
 “Alle Regionen”,
@@ -36,119 +81,36 @@ const regions = [
 “Naher Osten”
 ];
 
-const ARCHAEOLOGICAL_LABELS = [
-“stone amulet”, “amulet”, “talisman”, “charm”,
-“pendant”, “stone pendant”, “perforated stone”, “pierced stone”,
-“polished stone”, “stone artifact”, “neolithic stone”, “ground stone”,
-“whetstone”, “grinding stone”, “hammer stone”, “pebble tool”,
-“arrowhead”, “arrow head”, “projectile point”, “spearhead”, “spear point”,
-“flint tool”, “stone tool”, “lithic”, “scraper”, “blade”, “flint blade”,
-“hand axe”, “stone axe”, “polished axe”, “axehead”,
-“fibula”, “brooch”, “pin”, “buckle”, “clasp”,
-“coin”, “roman coin”, “greek coin”, “medieval coin”, “celtic coin”,
-“pottery”, “pottery shard”, “ceramic”, “vessel”, “amphora”, “vase”, “urn”, “bowl”,
-“sword”, “dagger”, “knife”, “axe”, “weapon”, “blade weapon”,
-“ring”, “finger ring”, “bracelet”, “necklace”, “bead”, “glass bead”,
-“bronze object”, “iron object”, “gold object”, “silver object”, “copper object”,
-“roman artifact”, “greek artifact”, “celtic artifact”, “medieval artifact”,
-“statue”, “figurine”, “sculpture”, “idol”, “venus figurine”,
-“tool”, “bone tool”, “antler tool”, “needle”, “spindle whorl”, “loom weight”,
-“religious object”, “ritual object”, “votive offering”, “cult object”,
-“fossil”, “bone”, “tooth”, “shell”, “amber”, “jet”
+const CLIP_LABELS = [
+“a]stone pendant with hole”,
+“a stone amulet”,
+“a polished stone tool”,
+“a flint arrowhead”,
+“a bronze fibula”,
+“an ancient coin”,
+“a pottery shard”,
+“a stone axe”,
+“a metal ring”,
+“a bone needle”,
+“a clay figurine”,
+“a bronze sword”,
+“a glass bead”
 ];
 
-const LABEL_TRANSLATIONS = {
-“stone amulet”: “Steinamulett”,
-“amulet”: “Amulett”,
-“talisman”: “Talisman”,
-“charm”: “Gluecksbringer”,
-“pendant”: “Anhaenger”,
-“stone pendant”: “Steinanhaenger”,
-“perforated stone”: “Durchlochter Stein”,
-“pierced stone”: “Durchbohrter Stein”,
-“polished stone”: “Geschliffener Stein”,
-“stone artifact”: “Steinartefakt”,
-“neolithic stone”: “Neolithischer Stein”,
-“ground stone”: “Geschliffener Stein”,
-“whetstone”: “Schleifstein”,
-“grinding stone”: “Mahlstein”,
-“hammer stone”: “Hammerstein”,
-“pebble tool”: “Gerollgeraet”,
-“arrowhead”: “Pfeilspitze”,
-“arrow head”: “Pfeilspitze”,
-“projectile point”: “Projektilspitze”,
-“spearhead”: “Speerspitze”,
-“spear point”: “Speerspitze”,
-“flint tool”: “Feuersteinwerkzeug”,
-“stone tool”: “Steinwerkzeug”,
-“lithic”: “Steingeraet”,
-“scraper”: “Schaber”,
-“blade”: “Klinge”,
-“flint blade”: “Feuersteinklinge”,
-“hand axe”: “Faustkeil”,
-“stone axe”: “Steinaxt”,
-“polished axe”: “Geschliffene Axt”,
-“axehead”: “Axtkopf”,
-“fibula”: “Fibel”,
-“brooch”: “Brosche”,
-“pin”: “Nadel”,
-“buckle”: “Schnalle”,
-“clasp”: “Spange”,
-“coin”: “Muenze”,
-“roman coin”: “Roemische Muenze”,
-“greek coin”: “Griechische Muenze”,
-“medieval coin”: “Mittelalterliche Muenze”,
-“celtic coin”: “Keltische Muenze”,
-“pottery”: “Keramik”,
-“pottery shard”: “Keramikscherbe”,
-“ceramic”: “Keramik”,
-“vessel”: “Gefaess”,
-“amphora”: “Amphore”,
-“vase”: “Vase”,
-“urn”: “Urne”,
-“bowl”: “Schale”,
-“sword”: “Schwert”,
-“dagger”: “Dolch”,
-“knife”: “Messer”,
-“axe”: “Axt”,
-“weapon”: “Waffe”,
-“blade weapon”: “Klingenwaffe”,
-“ring”: “Ring”,
-“finger ring”: “Fingerring”,
-“bracelet”: “Armreif”,
-“necklace”: “Halskette”,
-“bead”: “Perle”,
-“glass bead”: “Glasperle”,
-“bronze object”: “Bronzeobjekt”,
-“iron object”: “Eisenobjekt”,
-“gold object”: “Goldobjekt”,
-“silver object”: “Silberobjekt”,
-“copper object”: “Kupferobjekt”,
-“roman artifact”: “Roemisches Artefakt”,
-“greek artifact”: “Griechisches Artefakt”,
-“celtic artifact”: “Keltisches Artefakt”,
-“medieval artifact”: “Mittelalterliches Artefakt”,
-“statue”: “Statue”,
-“figurine”: “Figurine”,
-“sculpture”: “Skulptur”,
-“idol”: “Idol”,
-“venus figurine”: “Venusfigurine”,
-“tool”: “Werkzeug”,
-“bone tool”: “Knochenwerkzeug”,
-“antler tool”: “Geweihwerkzeug”,
-“needle”: “Nadel”,
-“spindle whorl”: “Spinnwirtel”,
-“loom weight”: “Webgewicht”,
-“religious object”: “Kultgegenstand”,
-“ritual object”: “Ritualobjekt”,
-“votive offering”: “Votivgabe”,
-“cult object”: “Kultobjekt”,
-“fossil”: “Fossil”,
-“bone”: “Knochen”,
-“tooth”: “Zahn”,
-“shell”: “Muschel”,
-“amber”: “Bernstein”,
-“jet”: “Gagat”
+const CLIP_TO_TYPE = {
+“a stone pendant with hole”: “Anhaenger”,
+“a stone amulet”: “Amulett”,
+“a polished stone tool”: “Steinwerkzeug”,
+“a flint arrowhead”: “Pfeilspitze”,
+“a bronze fibula”: “Fibel”,
+“an ancient coin”: “Muenze”,
+“a pottery shard”: “Keramik”,
+“a stone axe”: “Steinbeil”,
+“a metal ring”: “Ring”,
+“a bone needle”: “Nadel”,
+“a clay figurine”: “Figur”,
+“a bronze sword”: “Schwert”,
+“a glass bead”: “Perle”
 };
 
 export default function Home() {
@@ -156,7 +118,7 @@ const [uploadedImage, setUploadedImage] = useState(null);
 const [isDragging, setIsDragging] = useState(false);
 const [isAnalyzing, setIsAnalyzing] = useState(false);
 const [clipStatus, setClipStatus] = useState(“idle”);
-const [detectedLabels, setDetectedLabels] = useState([]);
+const [suggestedType, setSuggestedType] = useState(null);
 const [showResults, setShowResults] = useState(false);
 const [results, setResults] = useState([]);
 const [totalResults, setTotalResults] = useState(0);
@@ -197,31 +159,26 @@ try {
 const analyzeImageWithClip = async (imageUrl) => {
 if (!clipPipelineRef.current) {
 const loaded = await loadClipModel();
-if (!loaded) return [];
+if (!loaded) return null;
 }
 
 ```
 try {
   setClipStatus("analyzing");
   
-  const results = await clipPipelineRef.current(imageUrl, ARCHAEOLOGICAL_LABELS);
-  
-  const topLabels = results
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5)
-    .filter(r => r.score > 0.01)
-    .map(r => ({
-      en: r.label,
-      de: LABEL_TRANSLATIONS[r.label] || r.label,
-      score: r.score
-    }));
+  const results = await clipPipelineRef.current(imageUrl, CLIP_LABELS);
+  const best = results.sort((a, b) => b.score - a.score)[0];
   
   setClipStatus("ready");
-  return topLabels;
+  
+  if (best && best.score > 0.1) {
+    return CLIP_TO_TYPE[best.label] || null;
+  }
+  return null;
 } catch (err) {
   console.error("CLIP analysis error:", err);
   setClipStatus("error");
-  return [];
+  return null;
 }
 ```
 
@@ -245,7 +202,7 @@ if (file && file.type.startsWith(“image/”)) {
 const reader = new FileReader();
 reader.onload = (event) => {
 setUploadedImage(event.target.result);
-setDetectedLabels([]);
+setSuggestedType(null);
 };
 reader.readAsDataURL(file);
 }
@@ -257,13 +214,28 @@ if (file) {
 const reader = new FileReader();
 reader.onload = (event) => {
 setUploadedImage(event.target.result);
-setDetectedLabels([]);
+setSuggestedType(null);
 };
 reader.readAsDataURL(file);
 }
 }, []);
 
-const handleAnalyze = async () => {
+const handleAnalyzeImage = async () => {
+if (!uploadedImage) return;
+
+```
+setIsAnalyzing(true);
+const suggestion = await analyzeImageWithClip(uploadedImage);
+if (suggestion) {
+  setSuggestedType(suggestion);
+  setFilters(prev => ({ ...prev, objectType: suggestion }));
+}
+setIsAnalyzing(false);
+```
+
+};
+
+const handleSearch = async () => {
 setIsAnalyzing(true);
 setError(null);
 setResults([]);
@@ -271,16 +243,10 @@ setResults([]);
 ```
 try {
   let searchTerms = searchKeywords.trim();
-  let labels = [];
   
-  if (uploadedImage) {
-    labels = await analyzeImageWithClip(uploadedImage);
-    setDetectedLabels(labels);
-    
-    if (labels.length > 0) {
-      const englishTerms = labels.slice(0, 3).map(l => l.en).join(" ");
-      searchTerms = searchTerms ? searchTerms + " " + englishTerms : englishTerms;
-    }
+  const typeSearch = objectTypeToSearch[filters.objectType] || "";
+  if (typeSearch) {
+    searchTerms = searchTerms ? searchTerms + " " + typeSearch : typeSearch;
   }
 
   if (!searchTerms) {
@@ -290,7 +256,6 @@ try {
   const params = new URLSearchParams();
   params.append("q", searchTerms);
   if (filters.epoch !== "Alle Epochen") params.append("epoch", filters.epoch);
-  if (filters.objectType !== "Alle Objekttypen") params.append("object_type", filters.objectType);
   if (filters.region !== "Alle Regionen") params.append("region", filters.region);
   params.append("limit", "20");
 
@@ -318,17 +283,17 @@ setShowResults(false);
 setResults([]);
 setError(null);
 setSearchKeywords(””);
-setDetectedLabels([]);
+setSuggestedType(null);
 setFilters({ epoch: “Alle Epochen”, objectType: “Alle Objekttypen”, region: “Alle Regionen” });
 };
 
 const getStatusText = () => {
 switch (clipStatus) {
-case “loading”: return “Lade KI-Modell (einmalig ~50MB)…”;
-case “analyzing”: return “Analysiere Bild…”;
+case “loading”: return “Lade KI…”;
+case “analyzing”: return “Analysiere…”;
 case “ready”: return “KI bereit”;
 case “error”: return “KI nicht verfuegbar”;
-default: return “KI-Analyse verfuegbar”;
+default: return “”;
 }
 };
 
@@ -339,24 +304,24 @@ logo: { display: “flex”, alignItems: “center”, gap: “1rem” },
 logoIcon: { width: “48px”, height: “48px”, background: “linear-gradient(135deg, #c9a962, #a08050)”, borderRadius: “12px”, display: “flex”, alignItems: “center”, justifyContent: “center”, fontSize: “24px” },
 logoText: { fontSize: “1.5rem”, fontWeight: “600”, color: “#c9a962” },
 status: { padding: “0.5rem 1rem”, background: “rgba(201, 169, 98, 0.1)”, borderRadius: “8px”, fontSize: “0.875rem”, color: “#c9a962” },
-hero: { textAlign: “center”, padding: “3rem 2rem”, maxWidth: “800px”, margin: “0 auto” },
-title: { fontSize: “2.5rem”, fontWeight: “bold”, marginBottom: “1rem”, background: “linear-gradient(90deg, #e8e0d5, #c9a962)”, WebkitBackgroundClip: “text”, WebkitTextFillColor: “transparent” },
-subtitle: { fontSize: “1.125rem”, color: “rgba(232, 224, 213, 0.6)”, lineHeight: “1.6” },
+hero: { textAlign: “center”, padding: “2rem 2rem”, maxWidth: “800px”, margin: “0 auto” },
+title: { fontSize: “2.25rem”, fontWeight: “bold”, marginBottom: “0.75rem”, background: “linear-gradient(90deg, #e8e0d5, #c9a962)”, WebkitBackgroundClip: “text”, WebkitTextFillColor: “transparent” },
+subtitle: { fontSize: “1rem”, color: “rgba(232, 224, 213, 0.6)”, lineHeight: “1.5” },
 main: { padding: “0 2rem 4rem”, maxWidth: “1200px”, margin: “0 auto” },
 error: { background: “rgba(220, 50, 50, 0.1)”, border: “1px solid rgba(220, 50, 50, 0.3)”, borderRadius: “8px”, padding: “1rem”, marginBottom: “1.5rem”, color: “#ff6b6b” },
 grid: { display: “grid”, gridTemplateColumns: “repeat(auto-fit, minmax(300px, 1fr))”, gap: “2rem”, marginBottom: “2rem” },
-dropzone: { minHeight: “320px”, borderRadius: “16px”, padding: “2rem”, display: “flex”, flexDirection: “column”, alignItems: “center”, justifyContent: “center”, cursor: “pointer”, transition: “all 0.3s” },
+dropzone: { minHeight: “280px”, borderRadius: “16px”, padding: “1.5rem”, display: “flex”, flexDirection: “column”, alignItems: “center”, justifyContent: “center”, cursor: “pointer”, transition: “all 0.3s” },
 panel: { background: “rgba(232, 224, 213, 0.05)”, border: “1px solid rgba(232, 224, 213, 0.1)”, borderRadius: “16px”, padding: “1.5rem” },
-panelTitle: { fontSize: “1.25rem”, color: “#c9a962”, marginBottom: “1.25rem”, display: “flex”, alignItems: “center”, gap: “0.5rem” },
+panelTitle: { fontSize: “1.125rem”, color: “#c9a962”, marginBottom: “1rem” },
 input: { width: “100%”, padding: “0.75rem 1rem”, background: “rgba(0, 0, 0, 0.3)”, border: “1px solid rgba(232, 224, 213, 0.2)”, borderRadius: “8px”, color: “#e8e0d5”, fontSize: “1rem” },
 label: { display: “block”, fontSize: “0.75rem”, color: “rgba(232, 224, 213, 0.6)”, textTransform: “uppercase”, letterSpacing: “0.05em”, marginBottom: “0.5rem” },
-button: { width: “100%”, padding: “1rem”, background: “linear-gradient(135deg, #c9a962, #a08050)”, borderRadius: “12px”, border: “none”, color: “#1a1612”, fontWeight: “600”, fontSize: “1rem”, cursor: “pointer”, display: “flex”, alignItems: “center”, justifyContent: “center”, gap: “0.75rem” },
-tag: { padding: “0.35rem 0.75rem”, background: “rgba(201, 169, 98, 0.2)”, border: “1px solid #c9a962”, borderRadius: “999px”, fontSize: “0.8rem”, color: “#c9a962”, display: “inline-flex”, alignItems: “center”, gap: “0.5rem” },
-tagScore: { fontSize: “0.7rem”, opacity: 0.7, background: “rgba(0,0,0,0.3)”, padding: “0.1rem 0.4rem”, borderRadius: “999px” },
+button: { width: “100%”, padding: “1rem”, background: “linear-gradient(135deg, #c9a962, #a08050)”, borderRadius: “12px”, border: “none”, color: “#1a1612”, fontWeight: “600”, fontSize: “1rem”, cursor: “pointer” },
+buttonSecondary: { width: “100%”, padding: “0.75rem”, background: “transparent”, border: “1px solid #c9a962”, borderRadius: “8px”, color: “#c9a962”, fontSize: “0.875rem”, cursor: “pointer”, marginTop: “0.75rem” },
+suggestion: { marginTop: “1rem”, padding: “0.75rem”, background: “rgba(201, 169, 98, 0.15)”, border: “1px solid #c9a962”, borderRadius: “8px”, textAlign: “center” },
 card: { background: “rgba(232, 224, 213, 0.05)”, border: “1px solid rgba(232, 224, 213, 0.1)”, borderRadius: “12px”, overflow: “hidden” },
-cardImage: { position: “relative”, height: “176px”, background: “rgba(0, 0, 0, 0.2)”, overflow: “hidden” },
+cardImage: { position: “relative”, height: “160px”, background: “rgba(0, 0, 0, 0.2)”, overflow: “hidden” },
 cardContent: { padding: “1rem” },
-badge: { position: “absolute”, top: “12px”, right: “12px”, padding: “0.25rem 0.5rem”, background: “rgba(0, 0, 0, 0.8)”, border: “1px solid #c9a962”, borderRadius: “999px”, fontSize: “0.75rem”, fontWeight: “600”, color: “#c9a962” },
+badge: { position: “absolute”, top: “8px”, right: “8px”, padding: “0.2rem 0.5rem”, background: “rgba(0, 0, 0, 0.8)”, border: “1px solid #c9a962”, borderRadius: “999px”, fontSize: “0.7rem”, fontWeight: “600”, color: “#c9a962” },
 footer: { borderTop: “1px solid rgba(232, 224, 213, 0.1)”, padding: “1.5rem 2rem”, textAlign: “center”, color: “rgba(232, 224, 213, 0.4)”, fontSize: “0.875rem” }
 };
 
@@ -364,7 +329,6 @@ return (
 <>
 <Head>
 <title>ArchaeoFinder - Archaeologische Funde identifizieren</title>
-<meta name="description" content="Laden Sie ein Foto Ihres archaeologischen Fundes hoch und finden Sie aehnliche Artefakte." />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 </Head>
 
@@ -375,12 +339,12 @@ return (
         <div style={styles.logoIcon}>🏺</div>
         <span style={styles.logoText}>ArchaeoFinder</span>
       </div>
-      <div style={styles.status}>{getStatusText()}</div>
+      {clipStatus !== "idle" && <div style={styles.status}>{getStatusText()}</div>}
     </header>
 
     <section style={styles.hero}>
-      <h1 style={styles.title}>Entdecken Sie die Geschichte Ihres Fundes</h1>
-      <p style={styles.subtitle}>Laden Sie ein Foto hoch - die KI erkennt automatisch, was auf dem Bild ist und findet aehnliche Artefakte in Museumssammlungen.</p>
+      <h1 style={styles.title}>Finden Sie Vergleichsobjekte</h1>
+      <p style={styles.subtitle}>Laden Sie ein Foto hoch und waehlen Sie den Objekttyp - wir finden aehnliche Artefakte in Museumssammlungen.</p>
     </section>
 
     <main style={styles.main}>
@@ -402,36 +366,43 @@ return (
           
           {uploadedImage ? (
             <>
-              <img src={uploadedImage} alt="Upload" style={{maxHeight: "200px", borderRadius: "8px", objectFit: "contain"}} />
-              {detectedLabels.length > 0 && (
-                <div style={{marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center"}}>
-                  {detectedLabels.map((label, i) => (
-                    <span key={i} style={styles.tag}>
-                      {label.de}
-                      <span style={styles.tagScore}>{Math.round(label.score * 100)}%</span>
-                    </span>
-                  ))}
+              <img src={uploadedImage} alt="Upload" style={{maxHeight: "180px", borderRadius: "8px", objectFit: "contain"}} />
+              
+              {suggestedType && (
+                <div style={styles.suggestion}>
+                  KI-Vorschlag: <strong>{suggestedType}</strong>
                 </div>
               )}
-              <button onClick={(e) => { e.stopPropagation(); document.getElementById("file-input").click(); }} style={{marginTop: "1rem", padding: "0.5rem 1rem", border: "1px solid rgba(232, 224, 213, 0.3)", borderRadius: "8px", background: "transparent", color: "rgba(232, 224, 213, 0.6)", cursor: "pointer"}}>
+              
+              <button onClick={(e) => { e.stopPropagation(); handleAnalyzeImage(); }} disabled={isAnalyzing} style={styles.buttonSecondary}>
+                {isAnalyzing ? "Analysiere..." : "KI-Erkennung starten"}
+              </button>
+              
+              <button onClick={(e) => { e.stopPropagation(); document.getElementById("file-input").click(); }} style={{...styles.buttonSecondary, marginTop: "0.5rem", border: "1px solid rgba(232, 224, 213, 0.3)", color: "rgba(232, 224, 213, 0.6)"}}>
                 Anderes Bild
               </button>
             </>
           ) : (
             <>
               <div style={{fontSize: "3rem", marginBottom: "1rem", opacity: "0.4"}}>📷</div>
-              <h3 style={{fontSize: "1.25rem", color: "#e8e0d5", marginBottom: "0.5rem"}}>Bild hier ablegen</h3>
+              <h3 style={{fontSize: "1.125rem", color: "#e8e0d5", marginBottom: "0.5rem"}}>Bild hier ablegen</h3>
               <p style={{color: "rgba(232, 224, 213, 0.4)", fontSize: "0.875rem"}}>oder klicken zum Auswaehlen</p>
             </>
           )}
         </div>
 
         <div style={styles.panel}>
-          <h3 style={styles.panelTitle}>Suchoptionen</h3>
+          <h3 style={styles.panelTitle}>Suchkriterien</h3>
           <div style={{display: "flex", flexDirection: "column", gap: "1rem"}}>
             <div>
-              <label style={styles.label}>Suchbegriffe (optional)</label>
-              <input type="text" placeholder="z.B. Amulett, Pfeilspitze, Steinbeil..." value={searchKeywords} onChange={(e) => setSearchKeywords(e.target.value)} style={styles.input} />
+              <label style={styles.label}>Objekttyp (wichtig!)</label>
+              <select value={filters.objectType} onChange={(e) => setFilters({...filters, objectType: e.target.value})} style={styles.input}>
+                {objectTypes.map(t => <option key={t} value={t} style={{background: "#2d2520"}}>{t}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={styles.label}>Zusaetzliche Suchbegriffe</label>
+              <input type="text" placeholder="z.B. geschliffen, Loch, Bronze..." value={searchKeywords} onChange={(e) => setSearchKeywords(e.target.value)} style={styles.input} />
             </div>
             <div>
               <label style={styles.label}>Epoche</label>
@@ -440,19 +411,13 @@ return (
               </select>
             </div>
             <div>
-              <label style={styles.label}>Objekttyp</label>
-              <select value={filters.objectType} onChange={(e) => setFilters({...filters, objectType: e.target.value})} style={styles.input}>
-                {objectTypes.map(t => <option key={t} value={t} style={{background: "#2d2520"}}>{t}</option>)}
-              </select>
-            </div>
-            <div>
               <label style={styles.label}>Region</label>
               <select value={filters.region} onChange={(e) => setFilters({...filters, region: e.target.value})} style={styles.input}>
                 {regions.map(r => <option key={r} value={r} style={{background: "#2d2520"}}>{r}</option>)}
               </select>
             </div>
-            <button onClick={handleAnalyze} disabled={isAnalyzing} style={{...styles.button, opacity: isAnalyzing ? 0.7 : 1, cursor: isAnalyzing ? "not-allowed" : "pointer"}}>
-              {isAnalyzing ? "Suche..." : (uploadedImage ? "Bild analysieren und suchen" : "Vergleichsfunde suchen")}
+            <button onClick={handleSearch} disabled={isAnalyzing} style={{...styles.button, opacity: isAnalyzing ? 0.7 : 1}}>
+              {isAnalyzing ? "Suche..." : "Vergleichsfunde suchen"}
             </button>
           </div>
         </div>
@@ -465,7 +430,7 @@ return (
               <h2 style={{fontSize: "1.5rem", color: "#c9a962", marginBottom: "0.25rem"}}>Vergleichsfunde</h2>
               <p style={{color: "rgba(232, 224, 213, 0.6)"}}>
                 {results.length} von {totalResults.toLocaleString()} Ergebnissen
-                {detectedLabels.length > 0 && <span> - KI erkannte: {detectedLabels.slice(0, 3).map(l => l.de).join(", ")}</span>}
+                {filters.objectType !== "Alle Objekttypen" && <span> - Typ: {filters.objectType}</span>}
               </p>
             </div>
             <button onClick={resetSearch} style={{padding: "0.5rem 1rem", border: "1px solid rgba(232, 224, 213, 0.3)", borderRadius: "8px", background: "transparent", color: "rgba(232, 224, 213, 0.6)", cursor: "pointer"}}>
@@ -476,10 +441,10 @@ return (
           {results.length === 0 ? (
             <div style={{textAlign: "center", padding: "3rem", color: "rgba(232, 224, 213, 0.4)"}}>
               <p style={{marginBottom: "1rem"}}>Keine Ergebnisse gefunden.</p>
-              <p>Tipp: Geben Sie zusaetzliche Suchbegriffe ein oder waehlen Sie andere Filter.</p>
+              <p>Tipp: Waehlen Sie einen anderen Objekttyp oder aendern Sie die Suchbegriffe.</p>
             </div>
           ) : (
-            <div style={{display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1.25rem"}}>
+            <div style={{display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "1rem"}}>
               {results.map((result, index) => (
                 <div key={result.id || index} style={styles.card}>
                   <div style={styles.cardImage}>
@@ -491,10 +456,9 @@ return (
                     {result.similarity && <span style={styles.badge}>{result.similarity}%</span>}
                   </div>
                   <div style={styles.cardContent}>
-                    <h4 style={{fontSize: "1rem", color: "#e8e0d5", marginBottom: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical"}}>{result.title}</h4>
-                    {result.museum && <p style={{fontSize: "0.875rem", color: "rgba(232, 224, 213, 0.6)", marginBottom: "0.25rem"}}>{result.museum}</p>}
-                    {result.epoch && <p style={{fontSize: "0.875rem", color: "rgba(232, 224, 213, 0.4)", fontStyle: "italic"}}>{result.epoch}</p>}
-                    {result.source_url && <a href={result.source_url} target="_blank" rel="noopener noreferrer" style={{display: "inline-block", marginTop: "0.75rem", color: "#c9a962", fontSize: "0.875rem", textDecoration: "none"}}>Zur Quelle</a>}
+                    <h4 style={{fontSize: "0.9rem", color: "#e8e0d5", marginBottom: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical"}}>{result.title}</h4>
+                    {result.museum && <p style={{fontSize: "0.8rem", color: "rgba(232, 224, 213, 0.6)", marginBottom: "0.25rem"}}>{result.museum}</p>}
+                    {result.source_url && <a href={result.source_url} target="_blank" rel="noopener noreferrer" style={{display: "inline-block", marginTop: "0.5rem", color: "#c9a962", fontSize: "0.8rem", textDecoration: "none"}}>Zur Quelle</a>}
                   </div>
                 </div>
               ))}
@@ -505,7 +469,7 @@ return (
     </main>
 
     <footer style={styles.footer}>
-      <p>2025 ArchaeoFinder - KI-Bildanalyse laeuft lokal in Ihrem Browser - Datenquelle: Europeana</p>
+      <p>2025 ArchaeoFinder - Datenquelle: Europeana</p>
     </footer>
   </div>
 
