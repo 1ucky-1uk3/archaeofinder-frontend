@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 var APP_VERSION = "1.4.0";
 var API_BASE_URL = "https://api.archaeofinder.de";
 var SUPABASE_URL = "https://neyudzqjqbqfaxbfnglx.supabase.co";
-var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5leXVkenFqcWJxZmF4YmZuZ2x4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAwMDAwMDAsImV4cCI6MjA1NTAwMDAwMH0.placeholder";
+var SUPABASE_ANON_KEY = "sb_publishable_VHd1YE7yPwEjNhLDd5HUNQ_GV0OgMd5";
 
 var supabase = null;
 if (typeof window !== "undefined") {
