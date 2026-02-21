@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import Head from "next/head";
 
-var APP_VERSION = "1.1.0";
+var APP_VERSION = "1.2.0";
 var API_BASE_URL = "https://api.archaeofinder.de";
 
 var CLIP_LABELS = [
@@ -41,21 +41,21 @@ var LABEL_TO_GERMAN = {
 };
 
 var LABEL_TO_SEARCH = {
-  "a stone pendant with a hole": "stone pendant perforated amulet neolithic",
-  "a stone amulet": "stone amulet pendant charm neolithic",
-  "a polished stone artifact": "polished stone tool neolithic",
-  "a flint arrowhead": "flint arrowhead projectile point",
-  "a stone axe head": "stone axe polished neolithic",
-  "an ancient bronze fibula": "fibula brooch bronze roman",
-  "an ancient coin": "coin ancient roman medieval",
-  "a pottery fragment": "pottery shard ceramic vessel",
-  "a bronze ring": "ring bronze finger jewelry",
-  "a bone needle": "bone needle pin tool",
-  "a clay figurine": "figurine clay statue idol",
-  "a metal sword blade": "sword blade weapon bronze iron",
-  "a glass bead": "glass bead amber jewelry",
-  "a flint scraper tool": "flint scraper tool lithic",
-  "a bronze bracelet": "bracelet armring bronze jewelry"
+  "a stone pendant with a hole": "stone pendant amulet",
+  "a stone amulet": "stone amulet pendant",
+  "a polished stone artifact": "polished stone tool",
+  "a flint arrowhead": "flint arrowhead",
+  "a stone axe head": "stone axe",
+  "an ancient bronze fibula": "fibula brooch bronze",
+  "an ancient coin": "ancient coin",
+  "a pottery fragment": "pottery ceramic",
+  "a bronze ring": "bronze ring",
+  "a bone needle": "bone needle",
+  "a clay figurine": "figurine clay",
+  "a metal sword blade": "sword blade",
+  "a glass bead": "glass bead",
+  "a flint scraper tool": "flint scraper",
+  "a bronze bracelet": "bronze bracelet"
 };
 
 var epochs = ["Alle Epochen", "Steinzeit", "Bronzezeit", "Eisenzeit", "Roemische Kaiserzeit", "Mittelalter"];
@@ -102,6 +102,10 @@ export default function Home() {
   var searchKeywords = keywordsState[0];
   var setSearchKeywords = keywordsState[1];
 
+  var usedQueryState = useState("");
+  var usedQuery = usedQueryState[0];
+  var setUsedQuery = usedQueryState[1];
+
   var filterState = useState({ epoch: "Alle Epochen", region: "Alle Regionen" });
   var filters = filterState[0];
   var setFilters = filterState[1];
@@ -128,8 +132,8 @@ export default function Home() {
     if (!loaded) return [];
     try {
       setClipStatus("analyzing");
-      var results = await clipRef.current(imageUrl, CLIP_LABELS);
-      var sorted = results.sort(function(a, b) { return b.score - a.score; });
+      var clipResults = await clipRef.current(imageUrl, CLIP_LABELS);
+      var sorted = clipResults.sort(function(a, b) { return b.score - a.score; });
       var top = sorted.slice(0, 3).filter(function(r) { return r.score > 0.05; });
       setClipStatus("ready");
       return top.map(function(r) {
@@ -177,6 +181,7 @@ export default function Home() {
     setError(null);
     setResults([]);
     setDetectedLabels([]);
+    setUsedQuery("");
 
     try {
       var searchTerms = searchKeywords.trim();
@@ -185,7 +190,8 @@ export default function Home() {
         var labels = await analyzeImage(uploadedImage);
         setDetectedLabels(labels);
         if (labels.length > 0) {
-          var clipTerms = labels.map(function(l) { return l.search; }).join(" ");
+          var bestLabel = labels[0];
+          var clipTerms = bestLabel.search;
           searchTerms = searchTerms ? searchTerms + " " + clipTerms : clipTerms;
         }
       }
@@ -194,21 +200,37 @@ export default function Home() {
         searchTerms = "archaeology artifact";
       }
 
-      var params = new URLSearchParams();
-      params.append("q", searchTerms);
-      if (filters.epoch !== "Alle Epochen") params.append("epoch", filters.epoch);
-      if (filters.region !== "Alle Regionen") params.append("region", filters.region);
-      params.append("limit", "20");
+      setUsedQuery(searchTerms);
 
-      var response = await fetch(API_BASE_URL + "/api/search?" + params.toString());
-      if (!response.ok) throw new Error("Server error: " + response.status);
+      var url = API_BASE_URL + "/api/search?q=" + encodeURIComponent(searchTerms) + "&limit=20";
+      
+      console.log("Fetching:", url);
+
+      var response = await fetch(url);
+      
+      console.log("Response status:", response.status);
+      
+      if (!response.ok) {
+        throw new Error("Server error: " + response.status);
+      }
 
       var data = await response.json();
-      setResults(data.results || []);
-      setTotalResults(data.total_results || 0);
+      
+      console.log("API Response:", data);
+      console.log("Results count:", data.results ? data.results.length : 0);
+
+      if (data.results && data.results.length > 0) {
+        setResults(data.results);
+        setTotalResults(data.total_results || data.results.length);
+      } else {
+        setResults([]);
+        setTotalResults(0);
+      }
+      
       setShowResults(true);
 
     } catch (err) {
+      console.error("Search error:", err);
       setError("Fehler: " + err.message);
     } finally {
       setIsLoading(false);
@@ -222,6 +244,7 @@ export default function Home() {
     setError(null);
     setSearchKeywords("");
     setDetectedLabels([]);
+    setUsedQuery("");
     setFilters({ epoch: "Alle Epochen", region: "Alle Regionen" });
   }
 
@@ -330,12 +353,16 @@ export default function Home() {
                 <div>
                   <h2 style={{ fontSize: "1.25rem", color: "#c9a962" }}>Ergebnisse</h2>
                   <p style={{ fontSize: "0.85rem", color: "rgba(232,224,213,0.6)" }}>{results.length} von {totalResults} Funden</p>
+                  {usedQuery && <p style={{ fontSize: "0.75rem", color: "rgba(232,224,213,0.4)", marginTop: "0.25rem" }}>Suche: {usedQuery}</p>}
                 </div>
                 <button onClick={resetAll} style={{ padding: "0.4rem 0.8rem", border: "1px solid rgba(232,224,213,0.3)", borderRadius: "6px", background: "transparent", color: "rgba(232,224,213,0.6)", cursor: "pointer", fontSize: "0.8rem" }}>Neue Suche</button>
               </div>
 
               {results.length === 0 ? (
-                <p style={{ textAlign: "center", padding: "2rem", color: "rgba(232,224,213,0.4)" }}>Keine Ergebnisse gefunden.</p>
+                <div style={{ textAlign: "center", padding: "2rem", color: "rgba(232,224,213,0.4)" }}>
+                  <p>Keine Ergebnisse gefunden.</p>
+                  <p style={{ fontSize: "0.85rem", marginTop: "0.5rem" }}>Versuche andere Suchbegriffe.</p>
+                </div>
               ) : (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
                   {results.map(function(r, i) {
@@ -343,11 +370,12 @@ export default function Home() {
                       <div key={r.id || i} style={{ background: "rgba(232,224,213,0.05)", border: "1px solid rgba(232,224,213,0.1)", borderRadius: "10px", overflow: "hidden" }}>
                         <div style={{ height: "140px", background: "rgba(0,0,0,0.2)", position: "relative" }}>
                           {r.image_url ? <img src={r.image_url} alt={r.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={function(e) { e.target.style.display = "none"; }} /> : <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(232,224,213,0.3)" }}>Kein Bild</div>}
+                          {r.source && <span style={{ position: "absolute", top: "6px", left: "6px", padding: "0.15rem 0.4rem", background: "rgba(0,0,0,0.8)", borderRadius: "4px", fontSize: "0.6rem", color: "#c9a962" }}>{r.source}</span>}
                           {r.similarity && <span style={{ position: "absolute", top: "6px", right: "6px", padding: "0.15rem 0.4rem", background: "rgba(0,0,0,0.8)", border: "1px solid #c9a962", borderRadius: "999px", fontSize: "0.65rem", color: "#c9a962" }}>{r.similarity}%</span>}
                         </div>
                         <div style={{ padding: "0.75rem" }}>
-                          <h4 style={{ fontSize: "0.85rem", color: "#e8e0d5", marginBottom: "0.2rem" }}>{r.title}</h4>
-                          {r.museum && <p style={{ fontSize: "0.75rem", color: "rgba(232,224,213,0.5)" }}>{r.museum}</p>}
+                          <h4 style={{ fontSize: "0.85rem", color: "#e8e0d5", marginBottom: "0.2rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.title || "Unbekannt"}</h4>
+                          {r.museum && <p style={{ fontSize: "0.75rem", color: "rgba(232,224,213,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.museum}</p>}
                           {r.source_url && <a href={r.source_url} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.4rem", color: "#c9a962", fontSize: "0.75rem", textDecoration: "none" }}>Zur Quelle</a>}
                         </div>
                       </div>
