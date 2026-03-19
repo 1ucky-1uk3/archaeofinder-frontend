@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ArchaeoFinder — Visuelle Artefakt-Suche</title>
+<meta name="description" content="Google Lens für Archäologie — Finde ähnliche Artefakte aus internationalen Museumsdatenbanken">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a84c;--gold-dim:#a68a3a;--gold-glow:rgba(201,168,76,0.15);
+  --bg:#111110;--card:#1a1917;--elevated:#222120;
+  --text:#e8e0d0;--dim:#8a8274;--faint:#5a5548;
+  --green:#6aab6a;--red:#b85050;--blue:#7ba3c9;
+  --r:14px;--rs:8px;
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(201,168,76,0.04),transparent),radial-gradient(ellipse 60% 50% at 80% 90%,rgba(90,85,72,0.06),transparent),var(--bg)}
+
+.hdr{padding:14px 20px;border-bottom:1px solid rgba(201,168,76,0.08);display:flex;align-items:center;gap:10px;background:rgba(17,17,16,0.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+.hdr-icon{font-size:26px;filter:drop-shadow(0 0 8px rgba(201,168,76,0.3))}
+.hdr h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:.5px;line-height:1.1}
+.hdr .sub{font-size:10px;color:var(--faint);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
+.hdr-v{margin-left:auto;font-size:10px;color:var(--faint);border:1px solid rgba(201,168,76,0.1);padding:3px 8px;border-radius:4px}
+
+.main{max-width:680px;margin:0 auto;padding:24px 16px 100px}
+
+/* Upload */
+.upload{border:2px dashed rgba(201,168,76,0.2);border-radius:var(--r);padding:44px 20px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(26,25,23,0.5);position:relative;overflow:hidden}
+.upload:hover,.upload.over{border-color:var(--gold);background:rgba(201,168,76,0.03)}
+.upload.has{padding:0;border-style:solid;border-color:rgba(201,168,76,0.15)}
+.upload input{display:none}
+.u-icon{font-size:42px;margin-bottom:10px;opacity:.7}
+.u-title{color:var(--gold);font-size:17px;font-weight:600;margin-bottom:4px}
+.u-hint{color:var(--faint);font-size:12px}
+.u-img{width:100%;max-height:300px;object-fit:contain;display:block;border-radius:12px}
+.u-info{position:absolute;bottom:10px;right:10px;background:rgba(17,17,16,.85);backdrop-filter:blur(6px);border-radius:6px;padding:5px 12px;font-size:11px;color:var(--dim)}
+
+/* Buttons */
+.btn{width:100%;padding:16px 0;margin-top:16px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));border:none;border-radius:var(--r);color:var(--bg);font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.5px;transition:all .25s;box-shadow:0 4px 20px rgba(201,168,76,0.25)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(201,168,76,0.35)}
+.btn:disabled{background:var(--elevated);color:var(--faint);cursor:wait;box-shadow:none;transform:none}
+.btn-test{width:100%;padding:12px 0;margin-top:12px;background:none;border:1px solid rgba(201,168,76,0.2);border-radius:var(--rs);color:var(--dim);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s}
+.btn-test:hover{border-color:var(--gold);color:var(--gold)}
+.btn-test:disabled{opacity:0.4;cursor:wait}
+
+/* Loading / Messages */
+.ld{margin-top:16px}
+.ld-bar{height:3px;background:var(--elevated);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-dim),var(--gold));background-size:200% 100%;animation:sh 1.5s ease infinite;width:100%}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.ld-txt{text-align:center;color:var(--dim);font-size:13px;margin-top:10px;font-style:italic;font-family:'Cormorant Garamond',serif}
+.err{margin-top:16px;padding:14px 18px;background:rgba(184,80,80,0.08);border:1px solid rgba(184,80,80,0.2);border-left:3px solid var(--red);border-radius:var(--rs);color:#e0a0a0;font-size:13px}
+.ok-msg{margin-top:16px;padding:14px 18px;background:rgba(106,171,106,0.08);border:1px solid rgba(106,171,106,0.2);border-left:3px solid var(--green);border-radius:var(--rs);color:#a0e0a0;font-size:13px}
+.debug-box{margin-top:12px;padding:12px 16px;background:var(--card);border:1px solid rgba(201,168,76,0.08);border-radius:var(--rs);font-family:monospace;font-size:11px;color:var(--dim);white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}
+
+/* Results */
+.res{animation:fu .4s ease-out}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+@media(max-width:480px){.stats{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--card);border:1px solid rgba(201,168,76,.06);border-radius:var(--rs);padding:14px 10px;text-align:center}
+.st-v{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;line-height:1}
+.st-l{font-size:10px;color:var(--faint);margin-top:4px;letter-spacing:.5px;text-transform:uppercase}
+
+.guess{padding:12px 16px;background:var(--gold-glow);border:1px solid rgba(201,168,76,.12);border-radius:var(--rs);margin-bottom:14px;font-size:14px}
+.guess strong{color:var(--gold)}
+
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+.tag{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);border-radius:20px;padding:5px 13px;font-size:12px;color:var(--text);white-space:nowrap}
+.tag .sc{color:var(--faint);margin-left:5px;font-size:10px}
+
+.sec{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--gold);margin:24px 0 14px;display:flex;align-items:center;gap:8px}
+
+/* Museum Hit Cards — WITH images */
+.mcard{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid rgba(201,168,76,.06);border-radius:var(--r);overflow:hidden;margin-bottom:12px;transition:all .2s;border-left:4px solid var(--gold)}
+.mcard:hover{background:var(--elevated);border-color:rgba(201,168,76,.2);transform:translateY(-1px)}
+.mcard[data-t="2"]{border-left-color:var(--blue)}
+.mcard[data-t="3"]{border-left-color:var(--green)}
+.mcard[data-t="4"]{border-left-color:#b09ac2}
+.mcard-top{display:flex;gap:14px;padding:14px 16px}
+.mcard-img{width:90px;height:90px;border-radius:8px;object-fit:cover;background:var(--elevated);flex-shrink:0}
+.mcard-img.no-img{display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--faint)}
+.mcard-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.mcard-museum{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.mcard-flag{font-size:16px}
+.mcard-name{font-weight:700;font-size:15px;color:var(--text)}
+.mcard-title{font-size:13px;color:var(--dim);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mcard-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mcard-tier{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;white-space:nowrap}
+.mcard-tier[data-t="1"]{background:rgba(201,168,76,.12);color:var(--gold)}
+.mcard-tier[data-t="2"]{background:rgba(123,163,201,.12);color:var(--blue)}
+.mcard-tier[data-t="3"]{background:rgba(106,171,106,.12);color:var(--green)}
+.mcard-tier[data-t="4"]{background:rgba(176,154,194,.12);color:#b09ac2}
+.mcard-type{font-size:10px;color:var(--faint);padding:2px 8px;background:var(--elevated);border-radius:10px}
+.mcard-domain{font-size:10px;color:var(--faint)}
+.mcard-arrow{font-size:11px;color:var(--gold);margin-left:auto;font-weight:600}
+
+/* Visual Similar Grid */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px}
+@media(max-width:480px){.vgrid{grid-template-columns:repeat(2,1fr)}}
+.vcard{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:var(--card);border:1px solid rgba(201,168,76,.06);cursor:pointer;transition:all .2s}
+.vcard:hover{transform:scale(1.03);border-color:rgba(201,168,76,.2)}
+.vcard img{width:100%;height:100%;object-fit:cover}
+.vcard-badge{position:absolute;bottom:6px;left:6px;right:6px;background:rgba(17,17,16,.85);backdrop-filter:blur(6px);border-radius:6px;padding:4px 8px;font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vcard-badge.museum{color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.vcard-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--faint)}
+
+/* Empty / Verdict */
+.empty{text-align:center;padding:32px 20px;background:rgba(184,80,80,.05);border:1px solid rgba(184,80,80,.1);border-radius:var(--r);margin-bottom:20px}
+.empty .ei{font-size:32px;margin-bottom:8px}
+.empty p{color:var(--dim);font-size:13px}
+.verdict{text-align:center;padding:22px 20px;border-radius:var(--r);margin-top:8px}
+.verdict.g{background:rgba(106,171,106,.06);border:1px solid rgba(106,171,106,.15)}
+.verdict.m{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12)}
+.verdict.b{background:rgba(184,80,80,.06);border:1px solid rgba(184,80,80,.12)}
+.v-i{font-size:28px;margin-bottom:6px}
+.v-t{font-size:16px;font-weight:700;margin-bottom:4px}
+.verdict.g .v-t{color:var(--green)}.verdict.m .v-t{color:var(--gold)}.verdict.b .v-t{color:var(--red)}
+.v-d{color:var(--dim);font-size:12px}
+
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <span class="hdr-icon">🏛️</span>
+  <div><h1>ArchaeoFinder</h1><div class="sub">Visuelle Artefakt-Suche</div></div>
+  <span class="hdr-v">v2.0</span>
+</div>
+
+<div class="main">
+  <div class="upload" id="zone" onclick="document.getElementById('fi').click()">
+    <input type="file" id="fi" accept="image/jpeg,image/png,image/webp,image/gif">
+    <div id="ph">
+      <div class="u-icon">📷</div>
+      <div class="u-title">Artefakt-Foto hochladen</div>
+      <div class="u-hint">Drag & Drop oder tippen · JPG, PNG, WEBP · max 10 MB</div>
+    </div>
+    <img id="prev" class="u-img hidden" alt="Vorschau">
+    <div id="info" class="u-info hidden"></div>
+  </div>
+
+  <button class="btn hidden" id="sbtn" onclick="search()">🔍 Visuelle Suche starten</button>
+  <button class="btn-test" id="tbtn" onclick="testConnection()">🔧 Google Vision Verbindung testen</button>
+
+  <div id="ld" class="ld hidden"><div class="ld-bar"><div class="ld-fill"></div></div><div class="ld-txt" id="lt">Wird analysiert...</div></div>
+  <div id="eb" class="err hidden"></div>
+  <div id="ob" class="ok-msg hidden"></div>
+  <div id="db" class="debug-box hidden"></div>
+  <div id="ra" class="res hidden"></div>
+</div>
+
+<script>
+const API_URL = "https://api.archaeofinder.de";
+let file = null;
+
+// ═══════════════════════════════════════════════
+// TEST CONNECTION
+// ═══════════════════════════════════════════════
+async function testConnection() {
+  const btn = document.getElementById("tbtn");
+  btn.disabled = true; btn.textContent = "⏳ Teste Verbindung...";
+  hide("eb"); hide("ob"); hide("db");
+  const log = [];
+  try {
+    log.push("▸ Test 1: Backend erreichbar?");
+    const r1 = await fetch(API_URL+"/").then(r=>r.json()).catch(e=>({error:e.message}));
+    if(r1.error){log.push("  ❌ "+r1.error);showDebug(log);err("Backend nicht erreichbar");return}
+    log.push("  ✅ "+r1.name+" "+r1.version);
+
+    log.push("\n▸ Test 2: Vision API konfiguriert?");
+    const r2 = await fetch(API_URL+"/api/v2/status").then(r=>r.json()).catch(e=>({error:e.message}));
+    log.push("  Visual Search: "+(r2.visual_search_enabled?"✅ AKTIV":"❌ INAKTIV"));
+    log.push("  Whitelist: "+r2.whitelist_domains+" Domains");
+    if(!r2.visual_search_enabled){log.push("\n  ⚠️ GOOGLE_VISION_API_KEY fehlt!");showDebug(log);err("Key nicht gesetzt");return}
+
+    log.push("\n▸ Test 3: Google Vision API aufrufen...");
+    const r3 = await fetch(API_URL+"/api/v2/debug").then(r=>r.json()).catch(e=>({error:e.message}));
+    if(r3.detail==="Not Found"){log.push("  ⚠️ Debug-Endpoint fehlt — neueste main.py deployen!");showDebug(log);err("Debug-Endpoint fehlt");return}
+    log.push("  Status: "+r3.status_code);
+    if(r3.status_code===200||r3.status_code===400){log.push("  ✅ Google Vision API funktioniert!");showDebug(log);okMsg("Alles funktioniert! Google Vision API ist bereit.");return}
+    if(r3.status_code===403){log.push("  ❌ 403 — Billing nicht aktiviert oder Key ungültig");log.push("  "+JSON.stringify(r3.response?.error?.message||""));showDebug(log);err("Google API: 403 Forbidden");return}
+    log.push("  Response: "+JSON.stringify(r3,null,2));showDebug(log);err("Status "+r3.status_code);
+  } catch(e){log.push("\n❌ "+e.message);showDebug(log);err(e.message);
+  } finally{btn.disabled=false;btn.textContent="🔧 Google Vision Verbindung testen"}
+}
+function showDebug(l){const d=document.getElementById("db");d.textContent=l.join("\n");d.classList.remove("hidden")}
+
+// ═══════════════════════════════════════════════
+// UPLOAD
+// ═══════════════════════════════════════════════
+const zone=document.getElementById("zone"),fi=document.getElementById("fi");
+zone.addEventListener("dragover",e=>{e.preventDefault();zone.classList.add("over")});
+zone.addEventListener("dragleave",()=>zone.classList.remove("over"));
+zone.addEventListener("drop",e=>{e.preventDefault();e.stopPropagation();zone.classList.remove("over");pick(e.dataTransfer.files[0])});
+fi.addEventListener("change",e=>pick(e.target.files[0]));
+function pick(f){
+  if(!f||!f.type.startsWith("image/"))return;
+  if(f.size>10*1024*1024){err("Bild zu groß (max. 10 MB)");return}
+  file=f;
+  document.getElementById("prev").src=URL.createObjectURL(f);
+  document.getElementById("prev").classList.remove("hidden");
+  document.getElementById("info").textContent=f.name+" · "+(f.size/1024).toFixed(0)+" KB — Tippe für anderes Bild";
+  document.getElementById("info").classList.remove("hidden");
+  document.getElementById("ph").classList.add("hidden");
+  zone.classList.add("has");
+  document.getElementById("sbtn").classList.remove("hidden");
+  hide("eb");hide("ob");hide("db");hide("ra");
+}
+
+// ═══════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════
+async function search(){
+  if(!file)return;
+  const btn=document.getElementById("sbtn");
+  btn.disabled=true;btn.textContent="⏳ Wird analysiert...";
+  show("ld");hide("eb");hide("ob");hide("db");hide("ra");
+  setText("lt","Bild wird vorbereitet...");
+  try{
+    const b64=await toBase64(file);
+    setText("lt","Sende an ArchaeoFinder ("+(b64.length/1024).toFixed(0)+" KB)...");
+    const resp=await fetch(API_URL+"/api/v2/visual-search",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({image:b64}),
+    });
+    if(!resp.ok){const e=await resp.json().catch(()=>({}));throw new Error(e.detail||"Server-Fehler "+resp.status)}
+    setText("lt","Ergebnisse werden geladen...");
+    render(await resp.json());
+  }catch(e){err(e.message)}
+  finally{hide("ld");btn.disabled=false;btn.textContent="🔍 Visuelle Suche starten"}
+}
+function toBase64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f)})}
+
+// ═══════════════════════════════════════════════
+// RENDER RESULTS
+// ═══════════════════════════════════════════════
+function render(d){
+  const hr=d.hit_rate||0;
+  let h="";
+
+  // Stats
+  h+=`<div class="stats">
+    <div class="st"><div class="st-v" style="color:var(--dim)">${d.total_urls}</div><div class="st-l">URLs gesamt</div></div>
+    <div class="st"><div class="st-v" style="color:${d.museum_count>0?"var(--gold)":"var(--red)"}">${d.museum_count}</div><div class="st-l">Museum-Treffer</div></div>
+    <div class="st"><div class="st-v" style="color:${hr>30?"var(--green)":hr>10?"var(--gold)":"var(--red)"}">${hr.toFixed(0)}%</div><div class="st-l">Hit-Rate</div></div>
+    <div class="st"><div class="st-v" style="color:var(--faint)">${d.other_count}</div><div class="st-l">Sonstige</div></div>
+  </div>`;
+
+  // Best Guess
+  if(d.best_guess?.length>0)
+    h+=`<div class="guess">🏷️ <strong>Google erkennt:</strong> ${esc(d.best_guess.join(", "))}</div>`;
+
+  // Entities
+  if(d.entities?.length>0){
+    h+=`<div class="tags">`;
+    d.entities.forEach(e=>h+=`<span class="tag">${esc(e.description)}<span class="sc">${(e.score*100).toFixed(0)}%</span></span>`);
+    h+=`</div>`;
+  }
+
+  // Museum Hits — Rich Cards
+  h+=`<div class="sec">🏛️ Museums-Treffer (${d.museum_count})</div>`;
+
+  if(!d.museum_hits||d.museum_hits.length===0){
+    h+=`<div class="empty"><div class="ei">😔</div><p>Keine Treffer von Museums-Domains.<br><small>${d.total_urls} URLs gefunden, aber keine matched die Whitelist.</small></p></div>`;
+  } else {
+    d.museum_hits.forEach(m=>{
+      const hasImg=m.image_url&&m.image_url.length>5;
+      const imgHtml=hasImg
+        ?`<img class="mcard-img" src="${esc(m.image_url)}" alt="${esc(m.museum)}" onerror="this.outerHTML='<div class=\\'mcard-img no-img\\'>🏛️</div>'">`
+        :`<div class="mcard-img no-img">🏛️</div>`;
+
+      h+=`<a href="${esc(m.url)}" target="_blank" rel="noopener" class="mcard" data-t="${m.tier}">
+        <div class="mcard-top">
+          ${imgHtml}
+          <div class="mcard-body">
+            <div class="mcard-museum">
+              <span class="mcard-flag">${m.flag}</span>
+              <span class="mcard-name">${esc(m.museum)}</span>
+            </div>
+            ${m.title?`<div class="mcard-title">${esc(m.title)}</div>`:""}
+            <div class="mcard-meta">
+              <span class="mcard-tier" data-t="${m.tier}">Tier ${m.tier}</span>
+              <span class="mcard-type">${esc(m.type)}</span>
+              <span class="mcard-domain">${esc(m.domain)}</span>
+              <span class="mcard-arrow">Öffnen ↗</span>
+            </div>
+          </div>
+        </div>
+      </a>`;
+    });
+  }
+
+  // Visuell ähnliche Bilder — Galerie
+  if(d.visual_similar?.length>0){
+    h+=`<div class="sec">🔍 Visuell ähnliche Bilder (${d.visual_similar.length})</div>`;
+    h+=`<div class="vgrid">`;
+    d.visual_similar.forEach(v=>{
+      const badge=v.is_museum
+        ?`<div class="vcard-badge museum">${v.flag} ${esc(v.museum)}</div>`
+        :`<div class="vcard-badge">${esc(v.domain||'')}</div>`;
+      h+=`<a href="${esc(v.image_url)}" target="_blank" rel="noopener" class="vcard">
+        <img src="${esc(v.image_url)}" alt="Ähnlich" loading="lazy" onerror="this.outerHTML='<div class=\\'vcard-placeholder\\'>🖼️</div>'">
+        ${badge}
+      </a>`;
+    });
+    h+=`</div>`;
+  }
+
+  // Verdict
+  const vc=hr>30?"g":hr>10?"m":"b";
+  const vt={g:"Gute Trefferquote!",m:"Moderate Trefferquote — Fallback empfohlen",b:"Wenig Museums-Treffer"};
+  const vi={g:"✅",m:"⚠️",b:"❌"};
+  h+=`<div class="verdict ${vc}"><div class="v-i">${vi[vc]}</div><div class="v-t">${vt[vc]}</div>
+    <div class="v-d">${d.museum_count} von ${d.total_urls} URLs von Museums-Domains (${hr.toFixed(0)}%)</div></div>`;
+
+  const ra=document.getElementById("ra");
+  ra.innerHTML=h;
+  ra.classList.remove("hidden");
+  ra.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+// ═══════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════
+function esc(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function show(id){document.getElementById(id).classList.remove("hidden")}
+function hide(id){document.getElementById(id).classList.add("hidden")}
+function setText(id,t){document.getElementById(id).textContent=t}
+function err(msg){document.getElementById("eb").innerHTML="❌ <strong>Fehler:</strong> "+esc(msg);show("eb");hide("ob")}
+function okMsg(msg){document.getElementById("ob").innerHTML="✅ "+esc(msg);show("ob");hide("eb")}
+</script>
+</body>
+</html>
